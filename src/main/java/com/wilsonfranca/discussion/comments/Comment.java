@@ -1,6 +1,7 @@
 package com.wilsonfranca.discussion.comments;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import org.bson.types.ObjectId;
@@ -15,6 +16,7 @@ import java.time.Instant;
  * Created by wilson.franca on 02/11/17.
  */
 @Document
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class Comment {
 
     @Id
@@ -39,6 +41,8 @@ public class Comment {
 
     // reference to the answer, if the comment is from a answer
     private String answer;
+
+    private boolean active;
 
     public ObjectId getId() {
         return id;
@@ -94,5 +98,13 @@ public class Comment {
 
     public void setAnswer(String answer) {
         this.answer = answer;
+    }
+
+    public boolean isActive() {
+        return active;
+    }
+
+    public void setActive(boolean active) {
+        this.active = active;
     }
 }

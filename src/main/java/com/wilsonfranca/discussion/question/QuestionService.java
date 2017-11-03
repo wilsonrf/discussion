@@ -37,6 +37,7 @@ public class QuestionService {
             question = new Question();
 
             question.setText(questionRepresentation.getText());
+            question.setActive(true);
 
             questionRepository.save(question);
 
@@ -53,12 +54,38 @@ public class QuestionService {
 
         try {
 
-            question = questionRepository.findOne(id);
+            question = questionRepository.findByIdAndActiveIsTrue(id);
 
         } catch (Exception e) {
             logger.error("Error when getting the question [{}]", id.toHexString());
         }
 
+        return Optional.ofNullable(question);
+    }
+
+    public Optional<Question> delete(final ObjectId id) {
+
+        Question question = null;
+
+        try {
+
+            question = questionRepository.inactivate(id);
+
+        } catch (Exception e) {
+            logger.error("Error when delete the question [{}]", id.toHexString());
+        }
+
+        return Optional.ofNullable(question);
+    }
+
+    public Optional<Question> update(final ObjectId id, final QuestionRepresentation questionRepresentation) {
+        Question question = null;
+
+        try {
+            question = questionRepository.update(id, questionRepresentation.getText());
+        } catch (Exception e) {
+            logger.error("Erron on update the question [{}]", questionRepresentation);
+        }
         return Optional.ofNullable(question);
     }
 }

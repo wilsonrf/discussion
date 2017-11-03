@@ -12,8 +12,8 @@ appender('STDOUT', ConsoleAppender) {
 def appenderList = ['STDOUT']
 
 logger('org.mongodb', ERROR, appenderList, false)
-logger('org.springframework.data.mongodb.core.MongoTemplate', INFO, appenderList, false)
-logger('org.springframework.data.mongodb.repository.Query', INFO, appenderList, false)
+logger('org.springframework.data.mongodb.core.MongoTemplate', DEBUG, appenderList, false)
+logger('org.springframework.data.mongodb.repository.Query', DEBUG, appenderList, false)
 logger('org.springframework.data.mongodb.repository.support.SpringDataMongodbQuery', INFO, appenderList, false)
 logger('org.springframework.web', WARN, appenderList, false)
 root(INFO, appenderList)

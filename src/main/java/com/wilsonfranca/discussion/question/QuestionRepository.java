@@ -9,4 +9,6 @@ import org.springframework.stereotype.Repository;
  */
 @Repository
 public interface QuestionRepository  extends MongoRepository<Question, ObjectId>, QuestionRepositoryCustom {
+
+    public Question findByIdAndActiveIsTrue(final ObjectId id);
 }

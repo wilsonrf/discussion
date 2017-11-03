@@ -8,5 +8,7 @@ import org.springframework.stereotype.Repository;
  * Created by wilson.franca on 02/11/17.
  */
 @Repository
-public interface AnswerRepository extends MongoRepository<Answer, ObjectId> {
+public interface AnswerRepository extends MongoRepository<Answer, ObjectId>, AnswerRepositoryCustom {
+
+    public Answer findByIdAndActiveIsTrue(final ObjectId id);
 }

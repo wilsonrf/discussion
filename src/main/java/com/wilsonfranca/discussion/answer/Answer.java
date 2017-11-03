@@ -1,6 +1,8 @@
 package com.wilsonfranca.discussion.answer;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import org.bson.types.ObjectId;
@@ -10,11 +12,13 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.Instant;
+import java.util.List;
 
 /**
  * Created by wilson.franca on 02/11/17.
  */
 @Document
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class Answer {
 
     @Id
@@ -36,6 +40,11 @@ public class Answer {
 
     // reference to the question which owns this answer
     private String question;
+
+    private List<String> comments;
+
+    @JsonIgnore
+    private boolean active;
 
     public ObjectId getId() {
         return id;
@@ -83,5 +92,21 @@ public class Answer {
 
     public void setQuestion(String question) {
         this.question = question;
+    }
+
+    public List<String> getComments() {
+        return comments;
+    }
+
+    public void setComments(List<String> comments) {
+        this.comments = comments;
+    }
+
+    public boolean isActive() {
+        return active;
+    }
+
+    public void setActive(boolean active) {
+        this.active = active;
     }
 }

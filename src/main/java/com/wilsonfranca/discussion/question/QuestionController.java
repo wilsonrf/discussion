@@ -1,6 +1,7 @@
 package com.wilsonfranca.discussion.question;
 
 import com.wilsonfranca.discussion.answer.AnswerController;
+import com.wilsonfranca.discussion.comments.CommentController;
 import org.bson.types.ObjectId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -78,12 +79,25 @@ public class QuestionController {
                             .stream()
                             .forEach(s -> {
                                 Link link =
-                                        linkTo(methodOn(AnswerController.class).get(new ObjectId(s)))
-                                        .withRel("answer");
+                                        linkTo(methodOn(AnswerController.class).get(question.getId(), new ObjectId(s)))
+                                        .withRel("answers");
                                 links.add(link);
                             });
+
+                    Optional.ofNullable(question.getComments())
+                            .orElse(Collections.emptyList())
+                            .stream()
+                            .forEach(s -> {
+                                Link link =
+                                        linkTo(methodOn(CommentController.class)
+                                                .get("question", question.getId(), new ObjectId(s)))
+                                                .withRel("comments");
+                                links.add(link);
+                            });
+
                     Link self = linkTo(methodOn(QuestionController.class).get(id)).withSelfRel();
                     links.add(self);
+
                     Resource<Question> questionResource =
                             new Resource<Question>(question, links);
                     return ResponseEntity.ok(questionResource);
@@ -92,4 +106,33 @@ public class QuestionController {
         return responseEntity;
     }
 
+    @RequestMapping(method = RequestMethod.DELETE, path = "/{id}")
+    public ResponseEntity<?> delete(@PathVariable final ObjectId id) {
+
+        Optional<Question> questionOptional = questionService.delete(id);
+
+        ResponseEntity<?>  responseEntity = questionOptional
+                .filter(Objects::nonNull)
+                .filter(Question::isActive)
+                .map(question -> ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build())
+                .orElse(ResponseEntity.noContent().build());
+
+        return  responseEntity;
+
+    }
+
+    @RequestMapping(method = RequestMethod.PUT, path = "/{id}")
+    public ResponseEntity<?> update(@PathVariable final ObjectId id,
+                                    @RequestBody QuestionRepresentation questionRepresentation) {
+
+        Optional<Question> questionOptional = questionService.update(id, questionRepresentation);
+
+        ResponseEntity<?>  responseEntity = questionOptional
+                .filter(Objects::nonNull)
+                .filter(question -> question.getText().equalsIgnoreCase(questionRepresentation.getText()))
+                .map(question -> ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build())
+                .orElse(ResponseEntity.noContent().build());
+
+        return  responseEntity;
+    }
 }
