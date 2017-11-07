@@ -37,13 +37,16 @@ public class CommentService {
         comment.setText(commentRepresentation.getText());
         comment.setActive(true);
 
-        commentRepository.save(comment);
-
         if(QUESTION.equalsIgnoreCase(parent)) {
             comment.setQuestion(parentId.toHexString());
-            questionRepository.updateComments(comment.getText(), comment.getAuthor(), parentId, comment.getId(), false);
+            commentRepository.save(comment);
+            questionRepository.updateComments(comment, parentId, comment.getId(), false);
         } else if(ANSWER.equalsIgnoreCase(parent)) {
             comment.setAnswer(parentId.toHexString());
+            commentRepository.save(comment);
+            answerRepository.updateComments(comment, parentId, comment.getId(), false);
+            // TODO get the questionid from controller
+            //questionRepository.updateAnswersComments(comment, parentId, question, false);
         }
 
 
@@ -67,10 +70,10 @@ public class CommentService {
         Comment comment = null;
         if(QUESTION.equalsIgnoreCase(parent)) {
             comment = commentRepository.findByIdAndQuestionAndActiveIsTrue(parentId.toHexString(), id);
-            questionRepository.updateComments(comment.getText(), comment.getAuthor(), parentId, id, true);
+            questionRepository.updateComments(comment, parentId, id, true);
         } else if(ANSWER.equalsIgnoreCase(parent)) {
             comment = commentRepository.findByIdAndAnswerAndActiveIsTrue(parentId.toHexString(), id);
-            answerRepository.updateComments(parentId, id, true);
+            answerRepository.updateComments(comment, parentId, id, true);
         }
 
         return Optional.ofNullable(comment);

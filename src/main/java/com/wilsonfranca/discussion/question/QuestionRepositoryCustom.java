@@ -1,5 +1,7 @@
 package com.wilsonfranca.discussion.question;
 
+import com.wilsonfranca.discussion.answer.Answer;
+import com.wilsonfranca.discussion.comments.Comment;
 import org.bson.types.ObjectId;
 
 /**
@@ -7,11 +9,13 @@ import org.bson.types.ObjectId;
  */
 public interface QuestionRepositoryCustom {
 
-    public Question updateAnswers(final String text, final String author, final ObjectId questionId, final ObjectId answerId, final boolean delete);
+    public Question updateAnswers(final Answer answer, final ObjectId questionId, final ObjectId answerId, final boolean delete);
 
     public Question inactivate(final ObjectId id);
 
     public Question update(final ObjectId id, final String text);
 
-    public Question updateComments(final String text, final String author, ObjectId parentId, ObjectId id, final boolean delete);
+    public Question updateComments(final Comment comment, ObjectId parentId, ObjectId id, final boolean delete);
+
+    public Question updateAnswersComments(final Comment comment, ObjectId answerId, final ObjectId questionId, final boolean delete);
 }

@@ -1,5 +1,7 @@
 package com.wilsonfranca.discussion.question;
 
+import com.wilsonfranca.discussion.answer.Answer;
+import com.wilsonfranca.discussion.comments.Comment;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.FindAndModifyOptions;
@@ -17,16 +19,16 @@ public class QuestionRepositoryImpl implements QuestionRepositoryCustom {
     MongoTemplate mongoTemplate;
 
     @Override
-    public Question updateAnswers(final String text, final String author, ObjectId questionId, ObjectId answerId, boolean delete) {
+    public Question updateAnswers(final Answer answer, ObjectId questionId, ObjectId answerId, boolean delete) {
         Query query = new Query(Criteria.where("_id").is(questionId));
         Update update = null;
         if(delete) {
             update = new Update().pull("answers", answerId)
-                    .pull("embeddedAnswerses", new Question.EmbeddedAnswers(text, author))
+                    .pull("embeddedAnswerses", answer)
                     .inc("totalAnswers", -1);
         } else {
             update = new Update().addToSet("answers", answerId)
-                    .addToSet("embeddedAnswerses", new Question.EmbeddedAnswers(text, author))
+                    .addToSet("embeddedAnswerses", answer)
                     .inc("totalAnswers", 1);
         }
         FindAndModifyOptions findAndModifyOptions = new FindAndModifyOptions().returnNew(true);
@@ -57,7 +59,7 @@ public class QuestionRepositoryImpl implements QuestionRepositoryCustom {
     }
 
     @Override
-    public Question updateComments(final String text, final String author, ObjectId parentId, ObjectId id, boolean delete) {
+    public Question updateComments(final Comment comment, ObjectId parentId, ObjectId id, boolean delete) {
 
         Query query = new Query(Criteria.where("_id").is(parentId));
         Update update = null;
@@ -65,13 +67,37 @@ public class QuestionRepositoryImpl implements QuestionRepositoryCustom {
         if(delete) {
             update = new Update()
                     .pull("comments", id)
-                    .pull("embeddedCommentses", new Question.EmbeddedComments(text, author))
+                    .pull("embeddedCommentses", comment)
                     .inc("totalComments", -1);
         } else {
             update = new Update()
                     .addToSet("comments", id)
-                    .addToSet("embeddedCommentses", new Question.EmbeddedComments(text, author))
+                    .addToSet("embeddedCommentses", comment)
                     .inc("totalComments", 1);
+        }
+
+        FindAndModifyOptions findAndModifyOptions = new FindAndModifyOptions().returnNew(true);
+        Question returned = mongoTemplate.findAndModify(query, update, findAndModifyOptions, Question.class);
+
+        return returned;
+    }
+
+    @Override
+    public Question updateAnswersComments(final Comment comment, ObjectId answerId, ObjectId questionId, boolean delete) {
+
+        Query query = new Query(Criteria.where("_id")
+                .is(questionId)
+                .and("embeddedAnswerses._id")
+                .is(answerId));
+
+        Update update = null;
+
+        if(delete) {
+            update = new Update()
+                    .pull("embeddedAnswerses.embeddedCommentses", comment);
+        } else {
+            update = new Update()
+                    .addToSet("embeddedAnswerses.embeddedCommentses", comment);
         }
 
         FindAndModifyOptions findAndModifyOptions = new FindAndModifyOptions().returnNew(true);

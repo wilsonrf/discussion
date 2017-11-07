@@ -1,13 +1,9 @@
 package com.wilsonfranca.discussion.question;
 
-import com.wilsonfranca.discussion.answer.AnswerController;
-import com.wilsonfranca.discussion.comments.CommentController;
 import org.bson.types.ObjectId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.hateoas.Link;
-import org.springframework.hateoas.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
@@ -16,10 +12,10 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import javax.validation.Valid;
 import java.net.URI;
-import java.util.*;
-
-import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
-import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 
 /**
  * Created by wilson.franca on 02/11/17.
@@ -73,33 +69,8 @@ public class QuestionController {
         ResponseEntity<?> responseEntity = questionOptional
                 .filter(Objects::nonNull)
                 .map(question -> {
-                    List<Link> links = new ArrayList<Link>();
-                    Optional.ofNullable(question.getAnswers())
-                            .orElse(Collections.emptyList())
-                            .stream()
-                            .forEach(s -> {
-                                Link link =
-                                        linkTo(methodOn(AnswerController.class).get(question.getId(), new ObjectId(s)))
-                                        .withRel("answers");
-                                links.add(link);
-                            });
-
-                    Optional.ofNullable(question.getComments())
-                            .orElse(Collections.emptyList())
-                            .stream()
-                            .forEach(s -> {
-                                Link link =
-                                        linkTo(methodOn(CommentController.class)
-                                                .get("question", question.getId(), new ObjectId(s)))
-                                                .withRel("comments");
-                                links.add(link);
-                            });
-
-                    Link self = linkTo(methodOn(QuestionController.class).get(id)).withSelfRel();
-                    links.add(self);
-
-                    Resource<Question> questionResource =
-                            new Resource<Question>(question, links);
+                    QuestionResource questionResource =
+                            new QuestionResource(question);
                     return ResponseEntity.ok(questionResource);
                 }).orElse(ResponseEntity.notFound().build());
 

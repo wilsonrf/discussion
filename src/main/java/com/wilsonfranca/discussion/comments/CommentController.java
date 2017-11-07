@@ -47,11 +47,11 @@ public class CommentController {
                         Link self = linkTo(methodOn(CommentController.class).get(parent, parentId, comment.getId())).withSelfRel();
                         Link parentLink = null;
                         if(QUESTION.equalsIgnoreCase(parent)) {
-                            parentLink = linkTo(methodOn(QuestionController.class).get(parentId)).withRel(QUESTION);
+                            //parentLink = linkTo(methodOn(QuestionController.class).get(parentId)).withRel(QUESTION);
                         } else if(ANSWER.equalsIgnoreCase(parent)) {
                             //parentLink = linkTo(methodOn(AnswerController.class).get(parentId)).withRel(QUESTION);
                         }
-                        Resource<Comment> resource = new Resource<Comment>(comment, self, parentLink);
+                        Resource<Comment> resource = new Resource<Comment>(comment, self);
                         return ResponseEntity.created(URI.create(self.getHref())).body(resource);
                     }).orElse(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build());
 

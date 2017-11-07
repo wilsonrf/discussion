@@ -1,6 +1,6 @@
 package com.wilsonfranca.discussion.answer;
 
-import com.wilsonfranca.discussion.question.Question;
+import com.wilsonfranca.discussion.comments.Comment;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.FindAndModifyOptions;
@@ -29,15 +29,21 @@ public class AnswerRepositoryImpl implements AnswerRepositoryCustom {
     }
 
     @Override
-    public Answer updateComments(ObjectId parentId, ObjectId id, boolean delete) {
+    public Answer updateComments(final Comment comment, final ObjectId parentId, final ObjectId id, final boolean delete) {
 
         Query query = new Query(Criteria.where("_id").is(parentId));
         Update update = null;
 
         if(delete) {
-            update = new Update().pull("comments", id).inc("totalComments", -1);
+            update = new Update()
+                    .pull("comments", id)
+                    .pull("embeddedCommentses", comment)
+                    .inc("totalComments", -1);
         } else {
-            update = new Update().addToSet("comments", id).inc("totalComments", 1);
+            update = new Update()
+                    .addToSet("comments", id)
+                    .addToSet("embeddedCommentses", comment)
+                    .inc("totalComments", 1);
         }
 
         FindAndModifyOptions findAndModifyOptions = new FindAndModifyOptions().returnNew(true);

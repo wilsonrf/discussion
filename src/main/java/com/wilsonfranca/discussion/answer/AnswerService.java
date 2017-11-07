@@ -5,6 +5,8 @@ import org.bson.types.ObjectId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -41,7 +43,7 @@ public class AnswerService {
             answerRepository.save(answer);
 
             // add answers references
-            questionRepository.updateAnswers(answer.getText(), answer.getAuthor(), questionId, answer.getId(), false);
+            questionRepository.updateAnswers(answer, questionId, answer.getId(), false);
 
         } catch (Exception e) {
             logger.error("Error when creating a question", e);
@@ -73,12 +75,26 @@ public class AnswerService {
             answer = answerRepository.inactivate(questionId, id);
 
             // delete answers references
-            questionRepository.updateAnswers(answer.getText(), answer.getAuthor(), questionId, answer.getId(), true);
+            questionRepository.updateAnswers(answer, questionId, answer.getId(), true);
 
         } catch (Exception e) {
 
         }
 
         return Optional.ofNullable(answer);
+    }
+
+    public Optional<Page<Answer>> list(Pageable pageable) {
+
+        Page<Answer> answers = null;
+
+        try {
+            answers = answerRepository.findAll(pageable);
+        } catch (Exception e) {
+            logger.error("Error to list all questions", e);
+        }
+
+        return Optional.ofNullable(answers);
+
     }
 }

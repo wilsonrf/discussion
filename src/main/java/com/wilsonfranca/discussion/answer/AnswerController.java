@@ -1,13 +1,17 @@
 package com.wilsonfranca.discussion.answer;
 
 import com.wilsonfranca.discussion.comments.CommentController;
-import com.wilsonfranca.discussion.question.Question;
 import com.wilsonfranca.discussion.question.QuestionController;
 import org.bson.types.ObjectId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
+import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.Link;
+import org.springframework.hateoas.PagedResources;
 import org.springframework.hateoas.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -32,7 +36,6 @@ public class AnswerController {
     private static Logger logger = LoggerFactory.getLogger(AnswerController.class);
 
     private AnswerService answerService;
-
 
     public AnswerController(@Autowired final AnswerService answerService) {
         this.answerService = answerService;
@@ -95,6 +98,22 @@ public class AnswerController {
                     Resource<?> answerResource =
                             new Resource<Answer>(answer, links);
                     return ResponseEntity.ok(answerResource);
+                }).orElse(ResponseEntity.notFound().build());
+
+        return responseEntity;
+    }
+
+    @RequestMapping(method = RequestMethod.GET, path = "question/{questionId}/answer")
+    public ResponseEntity<?> list(@PathVariable final ObjectId questionId,
+                                  @PageableDefault(size = 10) Pageable pageable,
+                                  PagedResourcesAssembler pagedResourcesAssembler) {
+
+        Optional<Page<Answer>> answerOptional = answerService.list(pageable);
+        ResponseEntity<?> responseEntity = answerOptional
+                .filter(Objects::nonNull)
+                .map(answers -> {
+                   PagedResources<Resource<Answer>> resources = pagedResourcesAssembler.toResource(answers);
+                    return new ResponseEntity(resources, HttpStatus.OK);
                 }).orElse(ResponseEntity.notFound().build());
 
         return responseEntity;
