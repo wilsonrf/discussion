@@ -1,5 +1,6 @@
 package com.wilsonfranca.discussion.comments;
 
+import com.wilsonfranca.discussion.answer.Answer;
 import com.wilsonfranca.discussion.answer.AnswerRepository;
 import com.wilsonfranca.discussion.question.QuestionRepository;
 import org.bson.types.ObjectId;
@@ -44,9 +45,8 @@ public class CommentService {
         } else if(ANSWER.equalsIgnoreCase(parent)) {
             comment.setAnswer(parentId.toHexString());
             commentRepository.save(comment);
-            answerRepository.updateComments(comment, parentId, comment.getId(), false);
-            // TODO get the questionid from controller
-            //questionRepository.updateAnswersComments(comment, parentId, question, false);
+            Answer answer = answerRepository.updateComments(comment, parentId, comment.getId(), false);
+            questionRepository.updateAnswersComments(comment, parentId, new ObjectId(answer.getQuestion()), false);
         }
 
 

@@ -94,10 +94,12 @@ public class QuestionRepositoryImpl implements QuestionRepositoryCustom {
 
         if(delete) {
             update = new Update()
-                    .pull("embeddedAnswerses.embeddedCommentses", comment);
+                    .pull("embeddedAnswerses.$.embeddedCommentses", comment)
+                    .inc("embeddedAnswerses.$.totalComments", -1);
         } else {
             update = new Update()
-                    .addToSet("embeddedAnswerses.embeddedCommentses", comment);
+                    .addToSet("embeddedAnswerses.$.embeddedCommentses", comment)
+                    .inc("embeddedAnswerses.$.totalComments", 1);
         }
 
         FindAndModifyOptions findAndModifyOptions = new FindAndModifyOptions().returnNew(true);
